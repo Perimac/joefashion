@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:joefashion/common/utils/app_routes.dart';
 import 'package:joefashion/common/utils/environment.dart';
+import 'package:joefashion/common/utils/kstrings.dart';
+import 'package:joefashion/src/splashscreen/views/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  //load the correct environment
+  //Load the Environment
+  await dotenv.load(fileName:  Environment.fileName);
 
-  String envFileName = Environment.fileName;
-  print('Loading environment file: $envFileName'); // Add this line to debug
-
-  try {
-    await dotenv.load(fileName: envFileName);
-  } catch (e) {
-    print('Failed to load environment file: $e');
-  }
-
+  //Init Get storage a package for checking first time onbaording.
+  await GetStorage.init();
   runApp(const MyApp());
 }
 
@@ -23,13 +22,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    Size screenSize = MediaQuery.of(context).size;
+    return ScreenUtilInit(
+      designSize: screenSize,
+      minTextAdapt: true,
+      splitScreenMode: false,
+      useInheritedMediaQuery: true,
+      builder: (_,child) {
+        return MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          title: AppText.kAppName,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+            useMaterial3: true,
+          ),
+          routerConfig: router,
+        );
+      },
+      child: const SplashScreen(),
     );
   }
 }
